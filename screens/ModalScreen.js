@@ -5,32 +5,48 @@ import useAuth from '../hooks/useAuth';
 import { useNavigation } from '@react-navigation/native';
 import { db } from '../firebase';
 import { collection, doc, onSnapshot, query, serverTimestamp, setDoc } from 'firebase/firestore';
+import * as ImagePicker from 'expo-image-picker';
 
 const ModalScreen = () => {
     const { user } = useAuth();
     const navigation = useNavigation();
 
-    const [image, setImage] = useState(user?.photoURL);
+    const [name, setName] = useState(null)
+    const [image, setImage] = useState(null);
     const [occupation, setOccupation] = useState(null);
     const [age, setAge] = useState(null);
     const [userProfile, setUserProfile] = useState();
+    const [imageAdded, setImageAdded] = useState(false);
 
-    const incompleteForm = !image || !occupation || !age
+    //  user changes at least one value on the form
+    const incompleteForm = !name && !image && !occupation && !age
 
-    // TODO: add upload image functionality
     const updateUserProfile = () => {
         setDoc(doc(db, 'users', user.uid), {
             id: user.uid,
-            displayName: user.displayName,
-            photoURL: image,
-            occupation: occupation,
-            age: age,
+            displayName: !!name ? name : userProfile?.displayName,
+            photoURL: !!image ? image : userProfile?.photoURL,
+            occupation: !!occupation ? occupation : userProfile?.occupation,
+            age: !!age ? age : userProfile?.age,
             timestamp: serverTimestamp()
         }).then(() => {
             navigation.navigate('Home')
         }).catch(error => {
             alert(error.message)
         })
+    };
+
+    const addImage = async () => {
+        let _image = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            quality: 1,
+        });
+
+        if (!_image.cancelled) {
+            setImage(_image.uri)
+            setImageAdded(true)
+        }
     };
 
     useEffect(() => {
@@ -63,22 +79,35 @@ const ModalScreen = () => {
                 source={require("../assets/tune_up_banner.png")}
             />
 
+            {/* User input fields */}
             <Text style={tw`text-xl text-gray-500 p-2 font-bold`}>
-                Welcome {userProfile?.displayName}
+                Welcome {!!name ? name : userProfile?.displayName}
             </Text>
 
             <Text style={tw`text-center p-4 font-bold text-red-400`}>
-                Step 1: The Profile Pic
+                Edit Name
             </Text>
             <TextInput
-                value={image}
-                onChangeText={setImage}
+                value={name}
+                onChangeText={setName}
                 style={tw`text-center text-xl pb-2`}
-                placeholder="Enter a Profile Pic URL"
+                placeholder="Enter Name"
             />
 
             <Text style={tw`text-center p-4 font-bold text-red-400`}>
-                Step 2: The Occupation
+                Change Profile Pic
+            </Text>
+            <TouchableOpacity
+                onPress={addImage}
+                style={[
+                    tw`w-64 p-3 rounded-xl`,
+                    imageAdded ? tw`bg-green-500` : tw`bg-gray-500`
+                ]}>
+                <Text style={tw`text-center text-white text-xl`}>{imageAdded ? "Image Uploaded" : "Upload Image"}</Text>
+            </TouchableOpacity>
+
+            <Text style={tw`text-center p-4 font-bold text-red-400`}>
+                Change Occupation
             </Text>
             <TextInput
                 value={occupation}
@@ -88,7 +117,7 @@ const ModalScreen = () => {
             />
 
             <Text style={tw`text-center p-4 font-bold text-red-400`}>
-                Step 3: The Age
+                Change Age
             </Text>
             <TextInput
                 value={age}

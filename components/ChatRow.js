@@ -13,17 +13,29 @@ const ChatRow = ({ matchDetails }) => {
     const [matchedUserInfo, setMatchedUserInfo] = useState(null);
     const [lastMessage, setLastMessage] = useState("");
 
-    useEffect(() => {
-        setMatchedUserInfo(getMatchedUserInfo(matchDetails.users, user.uid))
-    }, [matchDetails, user]);
+    const matchedUser = getMatchedUserInfo(matchDetails.users, user.uid)
 
     // TODO: Long messages do not show up correctly
 
     useEffect(() => {
         onSnapshot(query(
+            collection(db, 'users'),
+        ), (snapshot) => {
+            setMatchedUserInfo(
+                snapshot.docs
+                    .filter((doc) => doc.id === matchedUser?.id)
+                    .map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }))[0]
+            )
+        })
+        onSnapshot(query(
             collection(db, "matches", matchDetails.id, "messages"),
             orderBy("timestamp", "desc")
-        ), (snapshot) => setLastMessage(snapshot.docs[0]?.data()?.message))
+        ), (snapshot) => {
+            setLastMessage(snapshot.docs[0]?.data()?.message)
+        })
     }, [matchDetails, db]);
 
     return (

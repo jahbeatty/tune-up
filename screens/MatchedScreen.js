@@ -10,15 +10,13 @@ const MatchedScreen = () => {
     const { loggedInProfile, userSwiped } = params;
 
     return (
-        <View style={[tw`h-full bg-red-500 pt-20`, { opacity: 0.8 }]}>
+        <View style={[tw`h-full bg-blue-700 pt-20`, { opacity: 0.8 }]}>
             <View style={tw`justify-center px-10 pt-20`}>
-                <Image
-                    style={tw`h-20 w-full rounded-full`}
-                    source={{ uri: "https://links.papareact.com/mg9" }} />
+                <Text style={tw`text-white text-center mt-5`}>Match Found</Text>
             </View>
 
             <Text style={tw`text-white text-center mt-5`}>
-                You and {userSwiped.displayName} have liked each other.
+                You and {userSwiped.displayName} have matched with each other.
             </Text>
 
             <View style={tw`flex-row justify-evenly mt-5`}>
@@ -35,17 +33,15 @@ const MatchedScreen = () => {
                     }}
                 />
             </View>
-
             <TouchableOpacity
-                style={tw`bg-white m-5 px-10 py-8 rounded-full mt-20`}
+                style={tw`bg-white m-15 px-10 py-5 rounded-full mt-20`}
                 onPress={() => {
                     navigation.goBack();
                     navigation.navigate("Chat");
                 }}
             >
-                <Text style={tw`justify-center`}>Send a Message</Text>
+                <Text style={tw`justify-center text-center`}>Send a Message</Text>
             </TouchableOpacity>
-
         </View>
     );
 };

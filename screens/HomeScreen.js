@@ -34,6 +34,7 @@ const HomeScreen = () => {
     const [Loading, SetLoading] = React.useState(false);
     const [CurrentSong, SetCurrentSong] = React.useState(Tracks[0]);
     const [Playing, SetPlaying] = useState(false);
+    const [userProfile, setUserProfile] = useState();
 
 
     // if user does not exist, open modal
@@ -71,7 +72,16 @@ const HomeScreen = () => {
                                 id: doc.id,
                                 ...doc.data(),
                             }))
-                    );
+                    )
+                    setUserProfile(
+                        snapshot.docs
+                            .filter((doc) => doc.id === user.uid)
+                            .map((doc) => ({
+                                id: doc.id,
+                                ...doc.data(),
+                            }))[0]
+                    )
+                        ;
                 });
         };
 
@@ -249,7 +259,7 @@ const HomeScreen = () => {
                 >
                     <Image
                         style={tw`h-10 w-10 rounded-full`}
-                        source={{ uri: user.photoURL }}
+                        source={{ uri: userProfile?.photoURL }}
                     />
                 </TouchableOpacity>
 
@@ -311,9 +321,10 @@ const HomeScreen = () => {
                                 style={tw`flex-1`}
                                 onPress={() => HandlePlayPause()}
                             >
-                                <ImageBackground style={tw`absolute top-0 h-full w-full rounded-xl justify-center items-center`} source={{ uri: card.photoURL }}>
-                                    {/* {Playing ? <Text style={tw`text-white`}>Playing</Text> : <Text style={tw`text-white`}>Not Playing</Text>} */}
-                                </ImageBackground>
+                                <Image
+                                    style={tw`absolute top-0 h-full w-full rounded-xl justify-center items-center`}
+                                    source={{ uri: card.photoURL }}
+                                />
                                 <View
                                     style={[
                                         tw`absolute bottom-0 bg-white w-full flex-row justify-between items-center h-20 px-6 py-2 rounded-b-xl`,
@@ -347,7 +358,7 @@ const HomeScreen = () => {
             </View>
 
             <View style={tw`justify-center items-center p-bottom-3`}>
-                <Text style={tw`text-l font-bold`}>{Playing ? "Now Playing" : "Tap to Play"}</Text>
+                <Text style={tw`font-bold`}>{Playing ? "Now Playing" : "Tap to Play"}</Text>
             </View>
 
             {/* Swipe and Pass buttons */}
